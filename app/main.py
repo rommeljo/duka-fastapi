@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.models import Products, Sales, Users, Payment
 from app.database import SessionLocal
 from app.jwt_service import create_access_token, get_current_active_user
-
+from app.database import Base, engine
 app = FastAPI()
 password_hash = PasswordHash.recommended()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
@@ -189,7 +189,10 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     token = create_access_token(user.email)
     return {"access_token": token, "token_type": "bearer"}
 
-
+@app.on_event("startup")
+def on_startup():
+    print("🗄️ Creating tables if they don’t exist...")
+    Base.metadata.create_all(bind=engine)
 
 if __name__ == "__main__":
     import uvicorn
