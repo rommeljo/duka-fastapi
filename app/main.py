@@ -191,7 +191,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 
 @app.on_event("startup")
 def on_startup():
-    print("🗄️ Creating tables if they don’t exist...")
+    print(" Creating tables ")
     Base.metadata.create_all(bind=engine)
 
 if __name__ == "__main__":

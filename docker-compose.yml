@@ -1,0 +1,11 @@
+version: "3.9"
+
+services:
+  fastapi:
+    build: .
+    container_name: fastapi
+    ports:
+      - "8000:80"
+    restart: always
+
+# docker compose is used to run multi container docker applications
