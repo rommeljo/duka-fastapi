@@ -5,7 +5,7 @@ import jwt
 import logging
 from typing import Annotated
 from fastapi import Depends, HTTPException, status
-
+from jose import JWTError
 
 
 
@@ -51,3 +51,32 @@ async def get_current_active_user(
     current_user: Annotated[str, Depends(get_current_user)],
 ):
     return current_user  
+
+
+def create_reset_token(user_id: int, minutes: int = 10) -> str:
+    # reuse your existing create_access_token logic if you want,
+    # but keep "type" to distinguish it
+    return create_access_token({"sub": str(user_id), "type": "pwd_reset"}, minutes=minutes)
+
+def decode_reset_token(token: str) -> dict:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired reset token"
+        )
+
+    if payload.get("type") != "pwd_reset":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid reset token type"
+        )
+
+    if not payload.get("sub"):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid reset token payload"
+        )
+
+    return payload

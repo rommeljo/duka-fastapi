@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String, Float, Column, ForeignKey, DateTime
+from sqlalchemy import Integer, String, Float, Column, ForeignKey, DateTime, Boolean, func
 from datetime import datetime
 from app.database import Base  # ✅ use the Base from database.py
 
@@ -39,3 +39,14 @@ class Payment(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class OTP(Base):
+    __tablename__ = "otps"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True, nullable=False)
+    otp_hash = Column(String, nullable=False)
+    purpose = Column(String, default="RESET_PASSWORD", index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    used = Column(Boolean, default=False)
+    attempts = Column(Integer, default=0)
+    last_sent_at = Column(DateTime(timezone=True), nullable=True)
